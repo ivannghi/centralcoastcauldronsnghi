@@ -23,7 +23,7 @@ def get_catalog():
                 "sku": "RED_POTION_0",
                 "name": "red potion",
                 "quantity": first_row.num_red_potions,
-                "price": 50,
+                "price": 50000,
                 "potion_type": [100, 0, 0, 0],
             }
         ]
