@@ -1,9 +1,11 @@
+import sqlalchemy
+from src import database as db
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
 
 router = APIRouter(
-    prefix="/barrels",
+    prefix="/barrels", 
     tags=["barrels"],
     dependencies=[Depends(auth.get_api_key)],
 )
@@ -36,3 +38,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "quantity": 1,
         }
     ]
+
+with db.engine.begin() as connection:
+        result = connection.execute(sql_to_execute)
