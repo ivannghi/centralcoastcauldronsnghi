@@ -31,8 +31,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         for barrel in barrels_delivered:
             total_red_ml = total_red_ml + barrel.ml_per_barrel
             total_gold = total_gold - barrel.price
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + total_gold))
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + total_red_ml))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
 
 
     return "OK"
