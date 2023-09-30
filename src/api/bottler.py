@@ -18,6 +18,14 @@ class PotionInventory(BaseModel):
 @router.post("/deliver")
 def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     """ """
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT * from global_inventory"))
+        first_row = result.first()
+        total_red_potions = first_row.num_red_potions
+        total_red_ml = first_row.num_red_ml
+        
+
+
     print(potions_delivered)
 
     return "OK"
@@ -34,12 +42,20 @@ def get_bottle_plan():
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
     # Initial logic: bottle all barrels into red potions.
+    red_ml_potion_count = 0
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT num_red_ml from global_inventory"))
+        first_row = result.first()
+        current_red_ml = first_row.num_red_ml
+        while current_red_ml >= 100:
+            #mix potions of size ___ ml
+            red_ml_potion_count += 1
+            current_red_ml -= 100
+
 
     return [
             {
                 "potion_type": [100, 0, 0, 0],
-                "quantity": 5,
+                "quantity": red_ml_potion_count,
             }
         ]
-with db.engine.begin() as connection:
-        result = connection.execute(sql_to_execute)

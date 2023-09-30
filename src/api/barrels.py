@@ -23,6 +23,17 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(barrels_delivered)
+    with db.engine.begin() as connection:
+        query = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+        first_row = query.first()
+        total_red_ml = first_row.num_red_ml
+        total_gold = first_row.gold
+        for barrel in barrels_delivered:
+            total_red_ml = total_red_ml + barrel.ml_per_barrel
+            total_gold = total_gold - barrel.price
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = " + total_gold))
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = " + total_red_ml))
+
 
     return "OK"
 
@@ -30,14 +41,20 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
+    barrels_to_buy = 0
     print(wholesale_catalog)
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+        first_row = result.first()
+        if first_row.num_red_potions < 10:
+            for barrel in wholesale_catalog:
+                if barrel.sku == "SMALL_RED_BARREL":
+                    if first_row.gold > barrel.price:
+                        barrels_to_buy = 1
 
     return [
         {
             "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
+            "quantity": barrels_to_buy, 
         }
     ]
-
-with db.engine.begin() as connection:
-        result = connection.execute(sql_to_execute)
