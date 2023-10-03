@@ -29,8 +29,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         total_red_ml = first_row.num_red_ml
         total_gold = first_row.gold
         for barrel in barrels_delivered:
-            total_red_ml = total_red_ml + barrel.ml_per_barrel
-            total_gold = total_gold - barrel.price
+            if barrel.potion_type == [100,0,0,0]:
+                total_red_ml = total_red_ml + barrel.ml_per_barrel
+                total_gold = total_gold - barrel.price
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
 
@@ -50,7 +51,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         if first_row.num_red_potions < 10:
             for barrel in wholesale_catalog:
                 if barrel.sku == "SMALL_RED_BARREL":
-                    print('hi')
                     if first_row.gold > barrel.price:
                         barrels_to_buy = 1
 

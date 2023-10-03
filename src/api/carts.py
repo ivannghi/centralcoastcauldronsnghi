@@ -24,7 +24,6 @@ cart_id = 1
 def create_cart(new_cart: NewCart):
     """ """
     global cart_id
-    global carts
     created_cart_id = cart_id
     cart_id += 1
     return {"cart_id": created_cart_id}
@@ -65,7 +64,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         total_cost = 0
         if bought_potions <= potions_count:
             total_cost = 50*bought_potions
-            total_gold -= total_cost
+            total_gold += total_cost
             potions_count -= bought_potions
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
             connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = {potions_count}"))
