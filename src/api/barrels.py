@@ -3,6 +3,7 @@ from src import database as db
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
+from operator import itemgetter
 
 router = APIRouter(
     prefix="/barrels", 
@@ -24,16 +25,25 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
-        query = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+        query = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, gold FROM global_inventory"))
         first_row = query.first()
         total_red_ml = first_row.num_red_ml
         total_gold = first_row.gold
+        total_blue_ml = first_row.num_blue_ml
+
         for barrel in barrels_delivered:
-            if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity == 1 and total_gold >= barrel.price:
-                total_red_ml = total_red_ml + barrel.ml_per_barrel
-                total_gold = total_gold - barrel.price
+            if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+                total_red_ml += barrel.ml_per_barrel
+                total_gold -= barrel.price
+            
+            elif barrel.sku == "SMALL_BLUE_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+                total_blue_ml += barrel.ml_per_barrel
+                total_gold -= barrel.price
+
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = {total_blue_ml}"))
+
 
 
     return "OK"
@@ -43,21 +53,50 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     barrels_list = []
-    barrels_to_buy = 0
+    red_barrels = 0
+    blue_barrels = 0 
     print(wholesale_catalog)
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
+        result = connection.execute(sqlalchemy.text("SELECT num_red_potions, num_blue_potions, gold FROM global_inventory"))
         first_row = result.first()
-        if first_row.num_red_potions < 10:
-            for barrel in wholesale_catalog:
-                if barrel.sku == "SMALL_RED_BARREL":
-                    if first_row.gold >= barrel.price:
-                        barrels_to_buy = 1
+        total_gold = first_row.gold
+        #find which potion to purchase first
+        potions_list = [(first_row.num_red_potions, "red"), (first_row.num_blue_potions, "blue")]
+        potions_list = sorted(potions_list, key=itemgetter(0))
+        print(potions_list)
 
-    if barrels_to_buy >= 1:
+        for pot in potions_list:
+            for barrel in wholesale_catalog:
+                if pot[1] == "red":
+                    #if red, look for red barrel
+                    if barrel.sku == "SMALL_RED_BARREL":
+                        if total_gold >= barrel.price:
+                            #purchase barrel for gold
+                            red_barrels = 1
+                            total_gold -= barrel.price
+                elif pot[1] == "blue":
+                    if barrel.sku == "SMALL_BLUE_BARREL":
+                        if total_gold >= barrel.price:
+                            blue_barrels = 1
+                            total_gold -= barrel.price
+
+
+    #     if first_row.num_red_potions < 10:
+    #         for barrel in wholesale_catalog:
+    #             if barrel.sku == "SMALL_RED_BARREL":
+    #                 if first_row.gold >= barrel.price:
+    #                     red_barrels = 1
+
+
+    if red_barrels >= 1:
         barrels_list.append({
             "sku": "SMALL_RED_BARREL",
-            "quantity": barrels_to_buy, 
+            "quantity": red_barrels, 
         })
-    print(barrels_to_buy)
+    if blue_barrels >= 1:
+        barrels_list.append({
+            "sku": "SMALL_BLUE_BARREL",
+            "quantity": blue_barrels, 
+        })
+    # print(barrels_to_buy)
     return barrels_list

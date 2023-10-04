@@ -17,7 +17,9 @@ def get_inventory():
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * from global_inventory"))
         first_row = result.first()
-    return {"number_of_potions": first_row.num_red_potions, "ml_in_barrels": first_row.num_red_ml, "gold": first_row.gold}
+        total_potions = first_row.num_red_potions + first_row.num_blue_potions
+        total_ml = first_row.num_red_ml + first_row.num_blue_ml
+    return {"number_of_potions": total_potions, "ml_in_barrels": total_ml, "gold": first_row.gold}
 
 class Result(BaseModel):
     gold_match: bool
