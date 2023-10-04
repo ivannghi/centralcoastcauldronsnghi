@@ -22,7 +22,7 @@ class Barrel(BaseModel):
 @router.post("/deliver")
 def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
-    print(barrels_delivered)
+    print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
         query = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory"))
         first_row = query.first()

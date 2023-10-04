@@ -31,11 +31,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = {total_red_potions}"))
 
-
-
-
-    print(potions_delivered)
-
+    print(f"Potions Delivered: {potions_delivered}")
     return "OK"
 
 # Gets called 4 times a day
@@ -66,5 +62,5 @@ def get_bottle_plan():
                 "potion_type": [100, 0, 0, 0],
                 "quantity": red_ml_potion_count,
             })
-
+    print(f"Bottle List: {bottle_list}")
     return bottle_list
