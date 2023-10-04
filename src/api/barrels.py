@@ -29,7 +29,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         total_red_ml = first_row.num_red_ml
         total_gold = first_row.gold
         for barrel in barrels_delivered:
-            if barrel.potion_type == [100,0,0,0] and barrel.quantity == 1 and total_gold >= barrel.price:
+            if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity == 1 and total_gold >= barrel.price:
                 total_red_ml = total_red_ml + barrel.ml_per_barrel
                 total_gold = total_gold - barrel.price
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
