@@ -24,7 +24,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         total_red_potions = first_row.num_red_potions
         total_red_ml = first_row.num_red_ml
         for potion in potions_delivered:
-            if potion.potion_type == [100,0,0,0]:
+            if potion.potion_type == [100,0,0,0] and total_red_ml >= (100 * potion.quantity):
                 total_red_ml = total_red_ml - (100 * potion.quantity)
                 total_red_potions = total_red_potions + potion.quantity
 
