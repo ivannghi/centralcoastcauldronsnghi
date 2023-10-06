@@ -30,6 +30,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         total_red_ml = first_row.num_red_ml
         total_gold = first_row.gold
         total_blue_ml = first_row.num_blue_ml
+        total_green_ml = first_row.num_green_ml
 
         for barrel in barrels_delivered:
             if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
@@ -40,9 +41,15 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                 total_blue_ml += barrel.ml_per_barrel
                 total_gold -= barrel.price
 
+            elif barrel.sku == "SMALL_GREEN_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+                total_green_ml += barrel.ml_per_barrel
+                total_gold -= barrel.price
+
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = {total_blue_ml}"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = {total_green_ml}"))
+
 
 
 
@@ -55,13 +62,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     barrels_list = []
     red_barrels = 0
     blue_barrels = 0 
+    green_barrels = 0
     print(wholesale_catalog)
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_potions, num_blue_potions, gold FROM global_inventory"))
+        result = connection.execute(sqlalchemy.text("SELECT num_red_potions, num_blue_potions, num_green_potions, gold FROM global_inventory"))
         first_row = result.first()
         total_gold = first_row.gold
         #find which potion to purchase first
-        potions_list = [(first_row.num_red_potions, "red"), (first_row.num_blue_potions, "blue")]
+        potions_list = [(first_row.num_red_potions, "red"), (first_row.num_blue_potions, "blue"), (first_row.num_green_potions, "green")]
         potions_list = sorted(potions_list, key=itemgetter(0))
         print(potions_list)
 
@@ -79,6 +87,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         if total_gold >= barrel.price:
                             blue_barrels = 1
                             total_gold -= barrel.price
+                elif pot[1] == "green":
+                    if barrel.sku == "SMALL_GREEN_BARREL":
+                        if total_gold >= barrel.price:
+                            green_barrels = 1
+                            total_gold -= barrel.price
+
 
 
     #     if first_row.num_red_potions < 10:
@@ -97,6 +111,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         barrels_list.append({
             "sku": "SMALL_BLUE_BARREL",
             "quantity": blue_barrels, 
+        })
+    if green_barrels >= 1:
+        barrels_list.append({
+            "sku": "SMALL_GREEN_BARREL",
+            "quantity": green_barrels, 
         })
     # print(barrels_to_buy)
     return barrels_list

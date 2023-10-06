@@ -70,6 +70,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         total_gold = first_row.gold
         total_red_potions = first_row.num_red_potions
         total_blue_potions = first_row.num_blue_potions
+        total_green_potions = first_row.num_green_potions
         total_cost = 0
         bought_potions = 0
 
@@ -84,6 +85,11 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 total_blue_potions -= potion.quantity
                 bought_potions += potion.quantity
 
+            elif potion.sku == "GREEN_POTION_0":
+                total_cost += 50*potion.quantity
+                total_green_potions -= potion.quantity
+                bought_potions += potion.quantity
+
         # if bought_potions <= potions_count:
         #     total_cost = 50*bought_potions
         #     first_row.gold += total_cost
@@ -95,6 +101,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = {total_red_potions}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = {total_blue_potions}"))
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = {total_green_potions}"))
 
 
     return {"total_potions_bought": bought_potions, "total_gold_paid": total_cost}
