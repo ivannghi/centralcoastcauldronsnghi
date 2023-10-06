@@ -65,7 +65,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     print(f"cart: {carts[cart_id]}")
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT gold, num_red_potions, num_blue_potions from global_inventory"))
+        result = connection.execute(sqlalchemy.text("SELECT gold, num_red_potions, num_blue_potions, num_green_potions from global_inventory"))
         first_row = result.first()
         total_gold = first_row.gold
         total_red_potions = first_row.num_red_potions
