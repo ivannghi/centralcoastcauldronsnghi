@@ -74,16 +74,15 @@ def get_bottle_plan():
         total_red_ml = first_row.num_red_ml
         total_blue_ml = first_row.num_blue_ml
         total_green_ml = first_row.num_green_ml
-        while total_red_ml >= 100:
+
             #mix potions of size ___ ml
+        while total_red_ml >= 100:
             bought_red_count += 1
             total_red_ml -= 100
         while total_blue_ml >= 100:
-            #mix potions of size ___ ml
             bought_blue_count += 1
             total_blue_ml -= 100
         while total_green_ml >= 100:
-            #mix potions of size ___ ml
             bought_green_count += 1
             total_green_ml -= 100
 

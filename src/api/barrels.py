@@ -93,15 +93,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             green_barrels = 1
                             total_gold -= barrel.price
 
-
-
-    #     if first_row.num_red_potions < 10:
-    #         for barrel in wholesale_catalog:
-    #             if barrel.sku == "SMALL_RED_BARREL":
-    #                 if first_row.gold >= barrel.price:
-    #                     red_barrels = 1
-
-
     if red_barrels >= 1:
         barrels_list.append({
             "sku": "SMALL_RED_BARREL",
