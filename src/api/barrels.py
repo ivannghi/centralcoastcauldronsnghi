@@ -25,7 +25,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
-        query = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, gold FROM global_inventory"))
+        query = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml, gold FROM global_inventory"))
         first_row = query.first()
         total_red_ml = first_row.num_red_ml
         total_gold = first_row.gold
