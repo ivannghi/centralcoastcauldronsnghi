@@ -33,15 +33,15 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         total_green_ml = first_row.num_green_ml
 
         for barrel in barrels_delivered:
-            if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+            if barrel.sku == "MINI_RED_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
                 total_red_ml += barrel.ml_per_barrel
                 total_gold -= barrel.price
             
-            elif barrel.sku == "SMALL_BLUE_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+            elif barrel.sku == "MINI_BLUE_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
                 total_blue_ml += barrel.ml_per_barrel
                 total_gold -= barrel.price
 
-            elif barrel.sku == "SMALL_GREEN_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
+            elif barrel.sku == "MINI_GREEN_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
                 total_green_ml += barrel.ml_per_barrel
                 total_gold -= barrel.price
 
@@ -78,35 +78,35 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             for barrel in wholesale_catalog:
                 if pot[1] == "red":
                     #if red, look for red barrel
-                    if barrel.sku == "SMALL_RED_BARREL":
+                    if barrel.sku == "MINI_RED_BARREL":
                         if total_gold >= barrel.price:
                             #purchase barrel for gold
                             red_barrels = 1
                             total_gold -= barrel.price
                 elif pot[1] == "blue":
-                    if barrel.sku == "SMALL_BLUE_BARREL":
+                    if barrel.sku == "MINI_BLUE_BARREL":
                         if total_gold >= barrel.price:
                             blue_barrels = 1
                             total_gold -= barrel.price
                 elif pot[1] == "green":
-                    if barrel.sku == "SMALL_GREEN_BARREL":
+                    if barrel.sku == "MINI_GREEN_BARREL":
                         if total_gold >= barrel.price:
                             green_barrels = 1
                             total_gold -= barrel.price
 
     if red_barrels >= 1:
         barrels_list.append({
-            "sku": "SMALL_RED_BARREL",
+            "sku": "MINI_RED_BARREL",
             "quantity": red_barrels, 
         })
     if blue_barrels >= 1:
         barrels_list.append({
-            "sku": "SMALL_BLUE_BARREL",
+            "sku": "MINI_BLUE_BARREL",
             "quantity": blue_barrels, 
         })
     if green_barrels >= 1:
         barrels_list.append({
-            "sku": "SMALL_GREEN_BARREL",
+            "sku": "MINI_GREEN_BARREL",
             "quantity": green_barrels, 
         })
     # print(barrels_to_buy)
