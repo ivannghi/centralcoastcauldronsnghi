@@ -1,3 +1,4 @@
+import random
 import sqlalchemy
 from src import database as db
 from fastapi import APIRouter, Depends
@@ -70,8 +71,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         total_gold = first_row.gold
         #find which potion to purchase first
         potions_list = [(first_row.num_green_potions, "green"), (first_row.num_blue_potions, "blue"), (first_row.num_red_potions, "red")]
+        # random.shuffle(potions_list)
         potions_list = sorted(potions_list, key=itemgetter(0))
-        # potions_list= potions_list.sort(key=lambda x: x[0], )
         print(potions_list)
 
         for pot in potions_list:
