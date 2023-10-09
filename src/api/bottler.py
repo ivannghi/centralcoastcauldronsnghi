@@ -23,7 +23,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         first_row = result.first()
         total_red_ml = first_row.num_red_ml
         total_blue_ml = first_row.num_blue_ml
-        total_green_ml = first_row.num_green.ml
+        total_green_ml = first_row.num_green_ml
         total_red_potions = first_row.num_red_potions
         total_blue_potions = first_row.num_blue_potions
         total_green_potions = first_row.num_green_potions
