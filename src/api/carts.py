@@ -76,17 +76,17 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
         for potion in carts[cart_id]:
             if potion.sku == "RED_POTION_0":
-                total_cost += 1*potion.quantity
+                total_cost += 50*potion.quantity
                 total_red_potions -= potion.quantity
                 bought_potions += potion.quantity
             
             elif potion.sku == "BLUE_POTION_0":
-                total_cost += 1*potion.quantity
+                total_cost += 50*potion.quantity
                 total_blue_potions -= potion.quantity
                 bought_potions += potion.quantity
 
             elif potion.sku == "GREEN_POTION_0":
-                total_cost += 1*potion.quantity
+                total_cost += 50*potion.quantity
                 total_green_potions -= potion.quantity
                 bought_potions += potion.quantity
 
