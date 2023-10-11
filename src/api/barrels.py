@@ -71,7 +71,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         total_gold = first_row.gold
         #find which potion to purchase first
         potions_list = [(first_row.num_green_potions, "green"), (first_row.num_blue_potions, "blue"), (first_row.num_red_potions, "red")]
-        # random.shuffle(potions_list)
+        random.shuffle(potions_list)
         potions_list = sorted(potions_list, key=itemgetter(0))
         print(potions_list)
 
