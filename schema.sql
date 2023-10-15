@@ -30,12 +30,12 @@ create table
   INSERT INTO potions
   (red_ml, green_ml, blue_ml, dark_ml, sku, name, price, quantity)
   VALUES
-  (50, 50, 0, 0, 'YELLOW_POTION_0', 'yellow potion', 50, 0),
-  (50, 0, 50, 0, 'PURPLE_POTION_0', 'purple potion', 50, 0),
-  (0, 50, 50, 0, 'TEAL_POTION_0', 'teal potion', 50, 0),
-  (100, 0, 0, 0, 'RED_POTION_0', 'red potion', 50, 0),
-  (0, 100, 0, 0, 'GREEN_POTION_0', 'green potion', 50, 0),
-  (0, 0, 100, 0, 'BLUE_POTION_0', 'blue potion', 50, 0)
+  (50, 50, 0, 0, 'YELLOW_POTION_0', 'yellow potion', 40, 0),
+  (50, 0, 50, 0, 'PURPLE_POTION_0', 'purple potion', 40, 0),
+  (0, 50, 50, 0, 'TEAL_POTION_0', 'teal potion', 40, 0),
+  (100, 0, 0, 0, 'RED_POTION_0', 'red potion', 40, 0),
+  (0, 100, 0, 0, 'GREEN_POTION_0', 'green potion', 40, 0),
+  (0, 0, 100, 0, 'BLUE_POTION_0', 'blue potion', 40, 0)
 
 /*cart_items table schema*/
 create table
