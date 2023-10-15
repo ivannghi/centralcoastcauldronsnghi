@@ -13,12 +13,17 @@ router = APIRouter(
 
 @router.get("/inventory")
 def get_inventory():
-    """ """
+    total_potions = 0
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT * from global_inventory"))
         first_row = result.first()
-        total_potions = first_row.num_red_potions + first_row.num_blue_potions + first_row.num_green_potions
         total_ml = first_row.num_red_ml + first_row.num_blue_ml + first_row.num_green_ml
+
+        potions_list = connection.execute(sqlalchemy.text("SELECT inventory from potions")).fetchall()
+        for potion in potions_list:
+            # print(potion[0])
+            total_potions += potion[0]
+
     return {"number_of_potions": total_potions, "ml_in_barrels": total_ml, "gold": first_row.gold}
 
 class Result(BaseModel):

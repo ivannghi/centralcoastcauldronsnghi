@@ -15,31 +15,21 @@ def get_catalog():
     catalog = []
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_potions, num_blue_potions, num_green_potions FROM global_inventory"))
-        first_row = result.first()
-        if first_row.num_red_potions > 0:
-           catalog.append({
-                "sku": "RED_POTION_0",
-                "name": "red potion",
-                "quantity": first_row.num_red_potions,
-                "price": 50,
-                "potion_type": [100, 0, 0, 0],
-            })
-        if first_row.num_blue_potions > 0:
-           catalog.append({
-                "sku": "BLUE_POTION_0",
-                "name": "blue potion",
-                "quantity": first_row.num_blue_potions,
-                "price": 50,
-                "potion_type": [0, 0, 100, 0],
-            })
-        if first_row.num_green_potions > 0:
-           catalog.append({
-                "sku": "GREEN_POTION_0",
-                "name": "green potion",
-                "quantity": first_row.num_green_potions,
-                "price": 50,
-                "potion_type": [0, 100, 0, 0],
-            })
+        result = connection.execute(sqlalchemy.text(
+                        """SELECT * FROM potions
+                        WHERE inventory > 0
+                        """
+                        ))
+        potions_table = result.fetchall()
+        print(potions_table)
+        for row in potions_table:
+            if row.inventory > 0:
+                catalog.append({
+                    "sku": row.sku,
+                    "name": row.name,
+                    "quantity": row.inventory,
+                    "price": row.price,
+                    "potion_type": [row.red_ml, row.green_ml, row.blue_ml, row.dark_ml],
+                })
 
     return catalog
