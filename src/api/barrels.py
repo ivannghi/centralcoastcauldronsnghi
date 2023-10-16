@@ -46,6 +46,11 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                 total_green_ml += barrel.ml_per_barrel
                 total_gold -= barrel.price
 
+        print(f"total_red_ml: {total_red_ml}")
+        print(f"total_green_ml: {total_green_ml}")
+        print(f"total_blue_ml: {total_blue_ml}")
+
+
         connection.execute(
             sqlalchemy.text("""
                             UPDATE global_inventory SET
