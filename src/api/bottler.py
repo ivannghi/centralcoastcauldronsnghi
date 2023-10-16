@@ -118,15 +118,15 @@ def get_bottle_plan():
             potion_type = pot[1]
             print(f"potion type: {potion_type}")
             print(f"red_ml: {total_red_ml}, green_ml: {total_green_ml}, blue_ml: {total_blue_ml}")
-            if potion_type[0] <= total_red_ml and potion_type[1] <= total_green_ml and potion_type[2] <= total_blue_ml:
+            if 2*potion_type[0] <= total_red_ml and 2*potion_type[1] <= total_green_ml and 2*potion_type[2] <= total_blue_ml:
                 bottle_list.append({
                     "potion_type": potion_type,
-                    "quantity": 1,
+                    "quantity": 2,
                 })
 
-                total_red_ml -= potion_type[0]
-                total_green_ml -= potion_type[1]
-                total_blue_ml -= potion_type[2]
+                total_red_ml -= 2*potion_type[0]
+                total_green_ml -= 2*potion_type[1]
+                total_blue_ml -= 2*potion_type[2]
 
             
     #         #mix potions of size ___ ml
