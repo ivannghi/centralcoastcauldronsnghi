@@ -23,6 +23,9 @@ def get_inventory():
         for potion in potions_list:
             # print(potion[0])
             total_potions += potion[0]
+        print(f"total potions: {total_potions}")
+        print(f"total_ml: {total_ml}")
+        print(f"total gold: {first_row.gold}")
 
     return {"number_of_potions": total_potions, "ml_in_barrels": total_ml, "gold": first_row.gold}
 
