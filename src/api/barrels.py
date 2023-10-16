@@ -26,25 +26,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml, gold FROM global_inventory"))
-        first_row = result.fetchone()
-        total_red_ml = first_row.num_red_ml
-        total_gold = first_row.gold
-        total_blue_ml = first_row.num_blue_ml
-        total_green_ml = first_row.num_green_ml
+        total_red_ml = 0
+        total_cost = 0
+        total_blue_ml = 0
+        total_green_ml = 0
 
         for barrel in barrels_delivered:
-            if barrel.sku == "SMALL_RED_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
-                total_red_ml += barrel.ml_per_barrel
-                total_gold -= barrel.price
+            if barrel.potion_type == [1,0,0,0] and barrel.quantity > 0:
+                total_red_ml += barrel.ml_per_barrel*barrel.quantity
+                total_cost += barrel.price*barrel.quantity
             
-            elif barrel.sku == "SMALL_BLUE_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
-                total_blue_ml += barrel.ml_per_barrel
-                total_gold -= barrel.price
+            elif barrel.potion_type == [0,0,1,0] and barrel.quantity > 0:
+                total_blue_ml += barrel.ml_per_barrel*barrel.quantity
+                total_cost += barrel.price*barrel.quantity
 
-            elif barrel.sku == "SMALL_GREEN_BARREL" and barrel.quantity > 0 and total_gold >= barrel.price:
-                total_green_ml += barrel.ml_per_barrel
-                total_gold -= barrel.price
+            elif barrel.sku == [0,1,0,0] and barrel.quantity > 0:
+                total_green_ml += barrel.ml_per_barrel*barrel.quantity
+                total_cost += barrel.price*barrel.quantity
 
         print(f"total_red_ml: {total_red_ml}")
         print(f"total_green_ml: {total_green_ml}")
@@ -54,12 +52,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         connection.execute(
             sqlalchemy.text("""
                             UPDATE global_inventory SET
-                            num_red_ml = :total_red_ml,
-                            num_green_ml = :total_green_ml,
-                            num_blue_ml = :total_blue_ml,
-                            gold = :total_gold                          
+                            num_red_ml = num_red_ml + :total_red_ml,
+                            num_green_ml = num_green_ml + :total_green_ml,
+                            num_blue_ml = num_blue_ml + :total_blue_ml,
+                            gold = gold - :total_cost                          
                             """),
-                            [{"total_red_ml": total_red_ml, "total_green_ml": total_green_ml, "total_blue_ml": total_blue_ml, "total_gold": total_gold}])
+                            [{"total_red_ml": total_red_ml, "total_green_ml": total_green_ml, "total_blue_ml": total_blue_ml, "total_cost": total_cost}])
 
         # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
         # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
@@ -81,12 +79,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         first_row = result.fetchone()
         total_gold = first_row.gold
         #find which potion to purchase first
-        potions_list = [(first_row.num_green_ml, "green"), (first_row.num_blue_ml, "blue"), (first_row.num_red_ml, "red")]
-        random.shuffle(potions_list)
-        potions_list = sorted(potions_list, key=itemgetter(0))
-        print(potions_list)
+        ml_list = [(first_row.num_green_ml, "green"), (first_row.num_blue_ml, "blue"), (first_row.num_red_ml, "red")]
+        random.shuffle(ml_list)
+        ml_list = sorted(ml_list, key=itemgetter(0))
+        print(ml_list)
 
-        for pot in potions_list:
+        for pot in ml_list:
             for barrel in wholesale_catalog:
                 if pot[1] == "red":
                     #if red, look for red barrel
