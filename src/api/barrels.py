@@ -40,13 +40,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                 total_blue_ml += barrel.ml_per_barrel*barrel.quantity
                 total_cost += barrel.price*barrel.quantity
 
-            elif barrel.sku == [0,1,0,0] and barrel.quantity > 0:
+            elif barrel.potion_type == [0,1,0,0] and barrel.quantity > 0:
                 total_green_ml += barrel.ml_per_barrel*barrel.quantity
                 total_cost += barrel.price*barrel.quantity
 
         print(f"total_red_ml: {total_red_ml}")
         print(f"total_green_ml: {total_green_ml}")
         print(f"total_blue_ml: {total_blue_ml}")
+        print(f"total cost: {total_cost}")
 
 
         connection.execute(
