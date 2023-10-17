@@ -26,6 +26,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory")).first()
+        print(f"red ml pre-barrel: {result.num_red_ml}")
+        print(f"green ml pre-barrel: {result.num_green_ml}")
+        print(f"blue ml pre-barrel: {result.num_blue_ml}")
+        print(f"gold pre-barrel: {result.gold}")
+
         total_red_ml = 0
         total_cost = 0
         total_blue_ml = 0
