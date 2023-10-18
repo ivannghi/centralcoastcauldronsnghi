@@ -114,47 +114,31 @@ def get_bottle_plan():
         to_bottle_list = sorted(to_bottle_list, key=itemgetter(0))
         print(f"Potion quantities: {to_bottle_list}")
 
+        # while total_red_ml >= 100 or total_green_ml >= 100 or total_blue_ml >= 100:
         for pot in to_bottle_list:
             potion_type = pot[1]
             print(f"potion type: {potion_type}")
             print(f"red_ml: {total_red_ml}, green_ml: {total_green_ml}, blue_ml: {total_blue_ml}")
-            if 2*potion_type[0] <= total_red_ml and 2*potion_type[1] <= total_green_ml and 2*potion_type[2] <= total_blue_ml:
+
+            if potion_type[0] <= total_red_ml and potion_type[1] <= total_green_ml and potion_type[2] <= total_blue_ml:
+                list_of_ml_limiters = []
+                if potion_type[0] > 0:
+                    list_of_ml_limiters.append(total_red_ml//potion_type[0])
+                if potion_type[1] > 0:
+                    list_of_ml_limiters.append(total_green_ml//potion_type[1])
+                if potion_type[2] > 0:
+                    list_of_ml_limiters.append(total_blue_ml//potion_type[2])
+                
+                make_potions = min(list_of_ml_limiters)
+
                 bottle_list.append({
                     "potion_type": potion_type,
-                    "quantity": 2,
+                    "quantity": make_potions,
                 })
 
-                total_red_ml -= 2*potion_type[0]
-                total_green_ml -= 2*potion_type[1]
-                total_blue_ml -= 2*potion_type[2]
-
-            
-    #         #mix potions of size ___ ml
-    #     while total_red_ml >= 100:
-    #         bought_red_count += 1
-    #         total_red_ml -= 100
-    #     while total_blue_ml >= 100:
-    #         bought_blue_count += 1
-    #         total_blue_ml -= 100
-    #     while total_green_ml >= 100:
-    #         bought_green_count += 1
-    #         total_green_ml -= 100
-
-    # if bought_red_count > 0:
-    #     bottle_list.append({
-    #             "potion_type": [100, 0, 0, 0],
-    #             "quantity": bought_red_count,
-    #         })
-    # if bought_blue_count > 0:
-    #     bottle_list.append({
-    #             "potion_type": [0, 0, 100, 0],
-    #             "quantity": bought_blue_count,
-    #         })
-    # if bought_green_count > 0:
-    #     bottle_list.append({
-    #             "potion_type": [0, 100, 0, 0],
-    #             "quantity": bought_green_count,
-    #         })
+                total_red_ml -= potion_type[0] * make_potions
+                total_green_ml -= potion_type[1] * make_potions
+                total_blue_ml -= potion_type[2] * make_potions
 
     print(f"Bottle List: {bottle_list}")
     return bottle_list
