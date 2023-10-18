@@ -66,10 +66,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
                             """),
                             [{"total_red_ml": total_red_ml, "total_green_ml": total_green_ml, "total_blue_ml": total_blue_ml, "total_cost": total_cost}])
 
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = {total_gold}"))
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = {total_blue_ml}"))
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = {total_green_ml}"))
     return "OK"
 
 # Gets called once a day
@@ -77,9 +73,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     barrels_list = []
-    red_barrels = 0
-    blue_barrels = 0 
-    green_barrels = 0
+
     print(wholesale_catalog)
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml, gold FROM global_inventory"))
@@ -92,39 +86,60 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         print(ml_list)
 
         for pot in ml_list:
+            fourth = total_gold//4
             for barrel in wholesale_catalog:
                 if pot[1] == "red":
                     #if red, look for red barrel
-                    if barrel.sku == "SMALL_RED_BARREL":
-                        if total_gold >= barrel.price:
+                    if barrel.potion_type == [1,0,0,0]:
+                        if fourth >= barrel.price:
                             #purchase barrel for gold
-                            red_barrels = 1
-                            total_gold -= barrel.price
-                elif pot[1] == "blue":
-                    if barrel.sku == "SMALL_BLUE_BARREL":
-                        if total_gold >= barrel.price:
-                            blue_barrels = 1
-                            total_gold -= barrel.price
+                            num_of_barrels = fourth//barrel.price
+                            if num_of_barrels > barrel.quantity:
+                                num_of_barrels = barrel.quantity
+                            fourth -= barrel.price * num_of_barrels
+                            barrels_list.append({
+                            "sku": barrel.sku,
+                            "quantity": num_of_barrels, 
+                            })
                 elif pot[1] == "green":
-                    if barrel.sku == "SMALL_GREEN_BARREL":
-                        if total_gold >= barrel.price:
-                            green_barrels = 1
-                            total_gold -= barrel.price
+                    if barrel.potion_type == [0,1,0,0]:
+                        if fourth >= barrel.price:
+                            #purchase barrel for gold
+                            num_of_barrels = fourth//barrel.price
+                            if num_of_barrels > barrel.quantity:
+                                num_of_barrels = barrel.quantity
+                            fourth -= barrel.price * num_of_barrels
+                            barrels_list.append({
+                            "sku": barrel.sku,
+                            "quantity": num_of_barrels, 
+                            })
+                elif pot[1] == "blue":
+                    if barrel.potion_type == [0,0,1,0]:
+                        if fourth >= barrel.price:
+                            #purchase barrel for gold
+                            num_of_barrels = fourth//barrel.price
+                            if num_of_barrels > barrel.quantity:
+                                num_of_barrels = barrel.quantity
+                            fourth -= barrel.price * num_of_barrels
+                            barrels_list.append({
+                            "sku": barrel.sku,
+                            "quantity": num_of_barrels, 
+                            })
 
-    if red_barrels >= 1:
-        barrels_list.append({
-            "sku": "SMALL_RED_BARREL",
-            "quantity": red_barrels, 
-        })
-    if blue_barrels >= 1:
-        barrels_list.append({
-            "sku": "SMALL_BLUE_BARREL",
-            "quantity": blue_barrels, 
-        })
-    if green_barrels >= 1:
-        barrels_list.append({
-            "sku": "SMALL_GREEN_BARREL",
-            "quantity": green_barrels, 
-        })
+    # if red_barrels >= 1:
+    #     barrels_list.append({
+    #         "sku": "SMALL_RED_BARREL",
+    #         "quantity": red_barrels, 
+    #     })
+    # if blue_barrels >= 1:
+    #     barrels_list.append({
+    #         "sku": "SMALL_BLUE_BARREL",
+    #         "quantity": blue_barrels, 
+    #     })
+    # if green_barrels >= 1:
+    #     barrels_list.append({
+    #         "sku": "SMALL_GREEN_BARREL",
+    #         "quantity": green_barrels, 
+    #     })
     # print(barrels_to_buy)
     return barrels_list
