@@ -85,6 +85,27 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         ml_list = sorted(ml_list, key=itemgetter(0))
         print(ml_list)
 
+        if total_gold <= 240:
+            if total_gold >= 60:
+                barrels_list.append({
+                    "sku": "MINI_RED_BARREL",
+                    "quantity": 1, 
+                    })
+                total_gold -= 60
+            if total_gold >= 60:
+                barrels_list.append({
+                    "sku": "MINI_GREEN_BARREL",
+                    "quantity": 1, 
+                    })
+                total_gold -= 60
+            if total_gold >= 60:
+                barrels_list.append({
+                    "sku": "MINI_BLUE_BARREL",
+                    "quantity": 1, 
+                    })
+                total_gold -= 60
+            return barrels_list
+
         for pot in ml_list:
             fourth = total_gold//4
             for barrel in wholesale_catalog:
@@ -98,9 +119,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                                 num_of_barrels = barrel.quantity
                             fourth -= barrel.price * num_of_barrels
                             barrels_list.append({
-                            "sku": barrel.sku,
-                            "quantity": num_of_barrels, 
-                            })
+                                "sku": barrel.sku,
+                                "quantity": num_of_barrels, 
+                                })
                 elif pot[1] == "green":
                     if barrel.potion_type == [0,1,0,0]:
                         if fourth >= barrel.price:
