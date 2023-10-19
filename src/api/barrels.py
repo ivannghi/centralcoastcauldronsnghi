@@ -79,6 +79,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         result = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml, gold FROM global_inventory"))
         first_row = result.fetchone()
         total_gold = first_row.gold
+        print(f" pre-plan total_gold:{total_gold}")
         #find which potion to purchase first
         ml_list = [(first_row.num_green_ml, "green"), (first_row.num_blue_ml, "blue"), (first_row.num_red_ml, "red")]
         random.shuffle(ml_list)
@@ -108,6 +109,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         for pot in ml_list:
             fourth = total_gold//4
+            print(f"fourth: {fourth}")
             for barrel in wholesale_catalog:
                 if pot[1] == "red":
                     #if red, look for red barrel
@@ -146,6 +148,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             "sku": barrel.sku,
                             "quantity": num_of_barrels, 
                             })
+            print(f"post-fourth: {fourth}")
 
     # if red_barrels >= 1:
     #     barrels_list.append({
@@ -163,4 +166,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     #         "quantity": green_barrels, 
     #     })
     # print(barrels_to_buy)
+    print(f"post-plan total gold: {total_gold}")
+    print(f"Barrels List: {barrels_list}")
     return barrels_list
