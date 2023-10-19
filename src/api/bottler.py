@@ -26,6 +26,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         total_red_ml = first_row.num_red_ml
         total_blue_ml = first_row.num_blue_ml
         total_green_ml = first_row.num_green_ml
+        total_red_used = 0
+        total_green_used = 0
+        total_blue_used = 0
+
         # total_red_potions = first_row.num_red_potions
         # total_blue_potions = first_row.num_blue_potions
         # total_green_potions = first_row.num_green_potions
@@ -38,9 +42,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
             # potion_dark = potion.potion_type[3]
 
             if total_red_ml >= potion_red and total_green_ml >= potion_green and total_blue_ml >= potion_blue:
-                total_red_ml -= potion_red
-                total_green_ml -= potion_green
-                total_blue_ml -= potion_blue
+                total_red_used += potion_red * potion.quantity
+                total_red_ml -= potion_red * potion.quantity
+                total_green_used += potion_green * potion.quantity
+                total_green_ml -= potion_green * potion.quantity
+                total_blue_used += potion_blue * potion.quantity
+                total_blue_ml -= potion_blue * potion.quantity
 
                 connection.execute(
                     sqlalchemy.text("""
@@ -71,11 +78,11 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
         connection.execute(
             sqlalchemy.text("""
                             UPDATE global_inventory SET
-                            num_red_ml = :total_red_ml,
-                            num_green_ml = :total_green_ml,
-                            num_blue_ml = :total_blue_ml
+                            num_red_ml = num_red_ml - :total_red_used,
+                            num_green_ml = num_green_ml -:total_green_used,
+                            num_blue_ml = num_blue_ml - :total_blue_used
                             """),
-                            [{"total_red_ml": total_red_ml, "total_green_ml": total_green_ml, "total_blue_ml": total_blue_ml}]
+                            [{"total_red_used": total_red_used, "total_green_used": total_green_used, "total_blue_used": total_blue_used}]
         )
 
     print(f"Potions Delivered: {potions_delivered}")
