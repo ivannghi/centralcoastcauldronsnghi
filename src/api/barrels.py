@@ -203,23 +203,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                             "quantity": num_of_barrels, 
                             })
             print(f"post-fourth: {fourth}")
-
-    # if red_barrels >= 1:
-    #     barrels_list.append({
-    #         "sku": "SMALL_RED_BARREL",
-    #         "quantity": red_barrels, 
-    #     })
-    # if blue_barrels >= 1:
-    #     barrels_list.append({
-    #         "sku": "SMALL_BLUE_BARREL",
-    #         "quantity": blue_barrels, 
-    #     })
-    # if green_barrels >= 1:
-    #     barrels_list.append({
-    #         "sku": "SMALL_GREEN_BARREL",
-    #         "quantity": green_barrels, 
-    #     })
-    # print(barrels_to_buy)
+    
     print(f"post-plan total gold: {total_gold}")
     print(f"Barrels List: {barrels_list}")
     return barrels_list
