@@ -26,12 +26,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
     """ """
     print(f"Barrels Delivered: {barrels_delivered}")
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * FROM global_inventory")).first()
-        print(f"red ml pre-barrel: {result.num_red_ml}")
-        print(f"green ml pre-barrel: {result.num_green_ml}")
-        print(f"blue ml pre-barrel: {result.num_blue_ml}")
-        print(f"gold pre-barrel: {result.gold}")
-
         total_red_ml = 0
         total_cost = 0
         total_blue_ml = 0
@@ -56,15 +50,57 @@ def post_deliver_barrels(barrels_delivered: list[Barrel]):
         print(f"total cost: {total_cost}")
 
 
-        connection.execute(
+        result = connection.execute(
             sqlalchemy.text("""
-                            UPDATE global_inventory SET
-                            num_red_ml = num_red_ml + :total_red_ml,
-                            num_green_ml = num_green_ml + :total_green_ml,
-                            num_blue_ml = num_blue_ml + :total_blue_ml,
-                            gold = gold - :total_cost                          
+                            INSERT INTO transactions
+                            (description)
+                            VALUES
+                            ('Bought ' || :total_red_ml || ' red mls, ' || :total_green_ml || ' green mls, and ' || :total_blue_ml || ' blue mls for '|| :total_cost || ' gold.')
+                            RETURNING id
                             """),
-                            [{"total_red_ml": total_red_ml, "total_green_ml": total_green_ml, "total_blue_ml": total_blue_ml, "total_cost": total_cost}])
+                            [{"total_red_ml": str(total_red_ml), "total_green_ml": str(total_green_ml), "total_blue_ml": str(total_blue_ml), "total_cost": str(total_cost)}])
+        transaction_id = result.scalar_one()
+
+        if total_red_ml > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('red', :transaction_id, :total_red_ml)
+                                """),
+                                [{"transaction_id": transaction_id, "total_red_ml": total_red_ml}])
+            
+        if total_green_ml > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('green', :transaction_id, :total_green_ml)
+                                """),
+                                [{"transaction_id": transaction_id, "total_green_ml": total_green_ml}])
+            
+        if total_blue_ml > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('blue', :transaction_id, :total_blue_ml)
+                                """),
+                                [{"transaction_id": transaction_id, "total_blue_ml": total_blue_ml}])
+            
+        if total_cost > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('gold', :transaction_id, :total_cost)
+                                """),
+                                [{"transaction_id": transaction_id, "total_cost": -total_cost}])
+        
 
     return "OK"
 
@@ -76,12 +112,30 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     print(wholesale_catalog)
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml, gold FROM global_inventory"))
-        first_row = result.fetchone()
-        total_gold = first_row.gold
+        result = connection.execute(
+            sqlalchemy.text(
+                """SELECT resource_id, SUM(change) as resource
+                FROM resource_ledger_entry
+                GROUP BY resource_id
+                """))
+        first_row = result.all()
+        total_red_ml = 0
+        total_green_ml = 0
+        total_blue_ml = 0
+        total_gold = 0
+        for resource in first_row:
+            if resource[0] == "gold":
+                total_gold = resource[1]
+            elif resource[0] == "red":
+                total_red_ml = resource[1]
+            elif resource[0] == "green":
+                total_green_ml = resource[1]
+            elif resource[0] == "blue":
+                total_blue_ml = resource[1]
+
         print(f" pre-plan total_gold:{total_gold}")
         #find which potion to purchase first
-        ml_list = [(first_row.num_green_ml, "green"), (first_row.num_blue_ml, "blue"), (first_row.num_red_ml, "red")]
+        ml_list = [(total_green_ml, "green"), (total_blue_ml, "blue"), (total_red_ml, "red")]
         random.shuffle(ml_list)
         ml_list = sorted(ml_list, key=itemgetter(0))
         print(ml_list)

@@ -20,16 +20,29 @@ class PotionInventory(BaseModel):
 @router.post("/deliver")
 def post_deliver_bottles(potions_delivered: list[PotionInventory]):
     """ """
+    print(potions_delivered)
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT * from global_inventory"))
-        first_row = result.first()
-        total_red_ml = first_row.num_red_ml
-        total_blue_ml = first_row.num_blue_ml
-        total_green_ml = first_row.num_green_ml
+        result = connection.execute(
+            sqlalchemy.text(
+                """SELECT resource_id, SUM(change) as resource
+                FROM resource_ledger_entry
+                GROUP BY resource_id
+                """))
+        first_row = result.all()
+        total_red_ml = 0
+        total_green_ml = 0
+        total_blue_ml = 0
+        for resource in first_row:
+            if resource[0] == "red":
+                total_red_ml = resource[1]
+            elif resource[0] == "green":
+                total_green_ml = resource[1]
+            elif resource[0] == "blue":
+                total_blue_ml = resource[1]
+
         total_red_used = 0
         total_green_used = 0
         total_blue_used = 0
-
         # total_red_potions = first_row.num_red_potions
         # total_blue_potions = first_row.num_blue_potions
         # total_green_potions = first_row.num_green_potions
@@ -49,41 +62,69 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                 total_blue_used += potion_blue * potion.quantity
                 total_blue_ml -= potion_blue * potion.quantity
 
+                potion_details = connection.execute(
+                    sqlalchemy.text("""
+                                    SELECT id, name
+                                    FROM potions
+                                    WHERE red_ml = :potion_red and
+                                    green_ml = :potion_green and
+                                    blue_ml = :potion_blue 
+                                    """),
+                                    [{"potion_red": potion_red, "potion_green": potion_green, "potion_blue": potion_blue}])
+                potion_id_name = potion_details.fetchone()
+
+                result = connection.execute(
+                    sqlalchemy.text("""
+                                    INSERT INTO transactions
+                                    (description)
+                                    VALUES
+                                    ('Bottled ' || :potion_quantity || ' ' || :potion_name || '(s)')
+                                    RETURNING id
+                                    """),
+                                    [{"potion_quantity": str(potion.quantity), "potion_name": str(potion_id_name[1])}])
+                transaction_id = result.scalar_one()
+
+
                 connection.execute(
                     sqlalchemy.text("""
-                                    UPDATE potions 
-                                    SET inventory = inventory + :potion_quantity 
-                                    WHERE red_ml = :potion_red
-                                    AND green_ml = :potion_green
-                                    AND blue_ml = :potion_blue
+                                    INSERT INTO potion_ledger_entry
+                                    (potion_id, transaction_id, change)
+                                    VALUES
+                                    (:potion_id, :transaction_id, :potion_quantity)
                                     """),
-                                    [{"potion_quantity": potion.quantity, "potion_red": potion_red, "potion_green": potion_green, "potion_blue": potion_blue}]
-                                    )
+                                    [{"potion_id": potion_id_name[0], "transaction_id": transaction_id, "potion_quantity": potion.quantity}])
 
 
-            # if potion.potion_type == [100,0,0,0] and total_red_ml >= (100 * potion.quantity):
-            #     total_red_ml -= (100 * potion.quantity)
-            #     total_red_potions += potion.quantity
-            #     print(total_red_potions)
-            # elif potion.potion_type == [0,0,100,0] and total_blue_ml >= (100 * potion.quantity):
-            #     total_blue_ml -= (100 * potion.quantity)
-            #     total_blue_potions += potion.quantity    
-            # elif potion.potion_type == [0,100,0,0] and total_green_ml >= (100 * potion.quantity):
-            #     total_green_ml -= (100 * potion.quantity)
-            #     total_green_potions += potion.quantity
+        if total_red_used > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('red', :transaction_id, :total_red_used)
+                                """),
+                                [{"transaction_id": transaction_id, "total_red_used": -total_red_used}])
+            
+        if total_green_used > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('green', :transaction_id, :total_green_used)
+                                """),
+                                [{"transaction_id": transaction_id, "total_green_ml": -total_green_used}])
+            
+        if total_blue_used > 0:
+            connection.execute(
+                sqlalchemy.text("""
+                                INSERT INTO resource_ledger_entry
+                                (resource_id, transaction_id, change)
+                                VALUES
+                                ('blue', :transaction_id, :total_blue_used)
+                                """),
+                                [{"transaction_id": transaction_id, "total_blue_ml": -total_blue_used}])
 
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_ml = {total_red_ml}"))
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_ml = {total_blue_ml}"))
-        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_ml = {total_green_ml}"))
-        connection.execute(
-            sqlalchemy.text("""
-                            UPDATE global_inventory SET
-                            num_red_ml = num_red_ml - :total_red_used,
-                            num_green_ml = num_green_ml -:total_green_used,
-                            num_blue_ml = num_blue_ml - :total_blue_used
-                            """),
-                            [{"total_red_used": total_red_used, "total_green_used": total_green_used, "total_blue_used": total_blue_used}]
-        )
 
     print(f"Potions Delivered: {potions_delivered}")
     return "OK"
@@ -101,22 +142,49 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into red potions.
     bottle_list = []
-    # bought_red_count = 0
-    # bought_blue_count = 0
-    # bought_green_count = 0
 
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("SELECT num_red_ml, num_blue_ml, num_green_ml from global_inventory"))
-        first_row = result.first()
-        total_red_ml = first_row.num_red_ml
-        total_blue_ml = first_row.num_blue_ml
-        total_green_ml = first_row.num_green_ml
+        result = connection.execute(
+            sqlalchemy.text(
+                """SELECT resource_id, SUM(change) as resource
+                FROM resource_ledger_entry
+                GROUP BY resource_id
+                """))
+        first_row = result.all()
+        total_red_ml = 0
+        total_green_ml = 0
+        total_blue_ml = 0
+        for resource in first_row:
+            if resource[0] == "red":
+                total_red_ml = resource[1]
+            elif resource[0] == "green":
+                total_green_ml = resource[1]
+            elif resource[0] == "blue":
+                total_blue_ml = resource[1]
 
         to_bottle_list = []
-        potions_result = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, inventory FROM potions"))
-        potions_result_table = potions_result.fetchall()
-        for potion in potions_result_table:
-            to_bottle_list.append((potion.inventory, [potion.red_ml, potion.green_ml, potion.blue_ml, 0]))
+        # potions_result = connection.execute(sqlalchemy.text("SELECT red_ml, green_ml, blue_ml, inventory FROM potions"))
+        # potions_result_table = potions_result.fetchall()
+
+        potions_result = connection.execute(
+            sqlalchemy.text(
+                """SELECT potion_id, SUM(change) as quantity
+                FROM potion_ledger_entry
+                GROUP BY potion_id
+                """)).all()
+        print(potions_result)
+
+        for potion in potions_result:
+            potion_id = potion[0]
+            formula = connection.execute(
+                sqlalchemy.text("""SELECT red_ml, green_ml, blue_ml from potions
+                                WHERE potions.id = :potion_id
+                                """),
+                                [{"potion_id": potion_id}])
+            first_row = formula.first()
+            print(first_row)
+
+            to_bottle_list.append((potion[1], [first_row.red_ml, first_row.green_ml, first_row.blue_ml, 0]))
         random.shuffle(to_bottle_list)
         to_bottle_list = sorted(to_bottle_list, key=itemgetter(0))
         print(f"Potion quantities: {to_bottle_list}")
