@@ -113,7 +113,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                                 VALUES
                                 ('green', :transaction_id, :total_green_used)
                                 """),
-                                [{"transaction_id": transaction_id, "total_green_ml": -total_green_used}])
+                                [{"transaction_id": transaction_id, "total_green_used": -total_green_used}])
             
         if total_blue_used > 0:
             connection.execute(
