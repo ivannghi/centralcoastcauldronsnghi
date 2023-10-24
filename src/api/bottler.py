@@ -123,7 +123,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory]):
                                 VALUES
                                 ('blue', :transaction_id, :total_blue_used)
                                 """),
-                                [{"transaction_id": transaction_id, "total_blue_ml": -total_blue_used}])
+                                [{"transaction_id": transaction_id, "total_blue_used": -total_blue_used}])
 
 
     print(f"Potions Delivered: {potions_delivered}")
