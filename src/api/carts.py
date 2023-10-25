@@ -1,3 +1,4 @@
+from enum import Enum
 import sqlalchemy
 from src import database as db
 from fastapi import APIRouter, Depends, Request
@@ -9,6 +10,96 @@ router = APIRouter(
     tags=["cart"],
     dependencies=[Depends(auth.get_api_key)],
 )
+
+class search_sort_options(str, Enum):
+    customer_name = "customer_name"
+    item_sku = "item_sku"
+    line_item_total = "line_item_total"
+    timestamp = "timestamp"
+
+class search_sort_order(str, Enum):
+    asc = "asc"
+    desc = "desc"   
+
+@router.get("/search/", tags=["search"])
+def search_orders(
+    customer_name: str = "",
+    potion_sku: str = "",
+    search_page: str = "",
+    sort_col: search_sort_options = search_sort_options.timestamp,
+    sort_order: search_sort_order = search_sort_order.desc,
+):
+    """
+    Search for cart line items by customer name and/or potion sku.
+
+    Customer name and potion sku filter to orders that contain the 
+    string (case insensitive). If the filters aren't provided, no
+    filtering occurs on the respective search term.
+
+    Search page is a cursor for pagination. The response to this
+    search endpoint will return previous or next if there is a
+    previous or next page of results available. The token passed
+    in that search response can be passed in the next search request
+    as search page to get that page of results.
+
+    Sort col is which column to sort by and sort order is the direction
+    of the search. They default to searching by timestamp of the order
+    in descending order.
+
+    The response itself contains a previous and next page token (if
+    such pages exist) and the results as an array of line items. Each
+    line item contains the line item id (must be unique), item sku, 
+    customer name, line item total (in gold), and timestamp of the order.
+    Your results must be paginated, the max results you can return at any
+    time is 5 total line items.
+    """
+
+    with db.engine.begin() as conn:
+        result = conn.execute(sqlalchemy.text(
+            """
+            SELECT cart_items.id, cart_items.quantity, potions.sku, potions.price, carts.name, cart_items.created_at
+            from cart_items
+            INNER JOIN potions ON potion_id = potions.id
+            INNER JOIN carts ON cart_id = carts.id
+            """
+        ))
+        query = result.all()
+        # print(results.all())
+        results = []
+        # for n in range(0, 5):
+        #     results.append(
+        #         {
+        #         "line_item_id": str(query[n][0]),
+        #         "item_sku": "1 oblivion potion",
+        #         "customer_name": query[n][4],
+        #         "line_item_total": str(query[n][1]*query[n][3]),
+        #         "timestamp": ,
+        #     }
+        #     )
+
+
+
+    return {
+        "previous": "",
+        "next": "",
+        "results": [
+            {
+                "line_item_id": 1,
+                "item_sku": "1 oblivion potion",
+                "customer_name": "Scaramouche",
+                "line_item_total": 50,
+                "timestamp": "2021-01-01T00:00:00Z",
+            },
+                        {
+                "line_item_id": 1,
+                "item_sku": "1 purple potion",
+                "customer_name": "Scaramouche",
+                "line_item_total": 50,
+                "timestamp": "2021-01-01T00:00:00Z",
+            }
+        ],
+    }
+
 
 class Item():
     def __init__(self, sku, quantity):
