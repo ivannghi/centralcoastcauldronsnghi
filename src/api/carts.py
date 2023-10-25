@@ -73,8 +73,15 @@ def search_orders(
         count = len(query)
         print(count)
 
+        if count - n > 4:
+            k = 5
+        elif count - n > 0:
+            k = count - n
+        else:
+            k = 0
+
         results = []
-        for m in range(n, n + 5):
+        for m in range(n, n + k):
             output_string = query[m][5].strftime("%Y-%m-%dT%H:%M:%SZ")
             results.append(
                 {
