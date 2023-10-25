@@ -32,8 +32,9 @@ def create_cart(new_cart: NewCart):
             sqlalchemy.text(
                 """INSERT INTO carts (name) VALUES (:name) RETURNING id"""),
             [{"name": name}])
+        cart_id = result.scalar_one()
     # print(result.scalar_one())
-    return {"cart_id": result.scalar_one()}
+    return {"cart_id": cart_id}
 
 
 @router.get("/{cart_id}")
