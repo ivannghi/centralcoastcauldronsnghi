@@ -53,51 +53,54 @@ def search_orders(
     Your results must be paginated, the max results you can return at any
     time is 5 total line items.
     """
+    if search_page == "":
+        n = 0
+    else:
+        n = int(search_page)
 
     with db.engine.begin() as conn:
         result = conn.execute(sqlalchemy.text(
             """
-            SELECT cart_items.id, cart_items.quantity, potions.sku, potions.price, carts.name, cart_items.created_at
-            from cart_items
-            INNER JOIN potions ON potion_id = potions.id
-            INNER JOIN carts ON cart_id = carts.id
+                SELECT cart_items.id, cart_items.quantity, potions.sku, potions.price, carts.name, cart_items.created_at
+                from cart_items
+                INNER JOIN potions ON potion_id = potions.id
+                INNER JOIN carts ON cart_id = carts.id
             """
         ))
+        
         query = result.all()
-        # print(results.all())
-        results = []
-        # for n in range(0, 5):
-        #     results.append(
-        #         {
-        #         "line_item_id": str(query[n][0]),
-        #         "item_sku": "1 oblivion potion",
-        #         "customer_name": query[n][4],
-        #         "line_item_total": str(query[n][1]*query[n][3]),
-        #         "timestamp": ,
-        #     }
-        #     )
+        print(query)
+        count = len(query)
+        print(count)
 
+        results = []
+        for m in range(n, n + 5):
+            output_string = query[m][5].strftime("%Y-%m-%dT%H:%M:%SZ")
+            results.append(
+                {
+                "line_item_id": str(query[m][0]),
+                "item_sku": str(query[m][1]) + query[m][2],
+                "customer_name": query[m][4],
+                "line_item_total": str(query[m][1]*query[m][3]),
+                "timestamp": output_string,
+            }
+            )
+
+    if n < 5:
+        prev = ""
+    else:
+        prev = str(n-5)
+
+    if n + 5 >= count:
+        next = str(n+5)
+    else:
+        next = ""
 
 
     return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            },
-                        {
-                "line_item_id": 1,
-                "item_sku": "1 purple potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        "previous": prev,
+        "next": next,
+        "results": results,
     }
 
 
