@@ -91,7 +91,7 @@ def search_orders(
     else:
         prev = str(n-5)
 
-    if n + 5 >= count:
+    if n + 5 <= count:
         next = str(n+5)
     else:
         next = ""
