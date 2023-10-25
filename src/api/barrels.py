@@ -162,47 +162,47 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             return barrels_list
 
         for pot in ml_list:
-            fourth = total_gold//4
-            print(f"fourth: {fourth}")
+            third = total_gold//3
+            print(f"third: {third}")
             for barrel in wholesale_catalog:
                 if pot[1] == "red":
                     #if red, look for red barrel
                     if barrel.potion_type == [1,0,0,0]:
-                        if fourth >= barrel.price:
+                        if third >= barrel.price:
                             #purchase barrel for gold
-                            num_of_barrels = fourth//barrel.price
+                            num_of_barrels = third//barrel.price
                             if num_of_barrels > barrel.quantity:
                                 num_of_barrels = barrel.quantity
-                            fourth -= barrel.price * num_of_barrels
+                            third -= barrel.price * num_of_barrels
                             barrels_list.append({
                                 "sku": barrel.sku,
                                 "quantity": num_of_barrels, 
                                 })
                 elif pot[1] == "green":
                     if barrel.potion_type == [0,1,0,0]:
-                        if fourth >= barrel.price:
+                        if third >= barrel.price:
                             #purchase barrel for gold
-                            num_of_barrels = fourth//barrel.price
+                            num_of_barrels = third//barrel.price
                             if num_of_barrels > barrel.quantity:
                                 num_of_barrels = barrel.quantity
-                            fourth -= barrel.price * num_of_barrels
+                            third -= barrel.price * num_of_barrels
                             barrels_list.append({
                             "sku": barrel.sku,
                             "quantity": num_of_barrels, 
                             })
                 elif pot[1] == "blue":
                     if barrel.potion_type == [0,0,1,0]:
-                        if fourth >= barrel.price:
+                        if third >= barrel.price:
                             #purchase barrel for gold
-                            num_of_barrels = fourth//barrel.price
+                            num_of_barrels = third//barrel.price
                             if num_of_barrels > barrel.quantity:
                                 num_of_barrels = barrel.quantity
-                            fourth -= barrel.price * num_of_barrels
+                            third -= barrel.price * num_of_barrels
                             barrels_list.append({
                             "sku": barrel.sku,
                             "quantity": num_of_barrels, 
                             })
-            print(f"post-fourth: {fourth}")
+            print(f"post-third: {third}")
     
     print(f"post-plan total gold: {total_gold}")
     print(f"Barrels List: {barrels_list}")
