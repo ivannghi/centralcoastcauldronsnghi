@@ -112,6 +112,14 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     print(wholesale_catalog)
     with db.engine.begin() as connection:
+        potions = connection.execute(sqlalchemy.text(
+            """
+            SELECT SUM(change) AS total_potions FROM potion_ledger_entry
+            """
+        ))
+        total_potions = potions.scalar_one()
+        if total_potions >= 250:
+            return []
         result = connection.execute(
             sqlalchemy.text(
                 """SELECT resource_id, SUM(change) as resource

@@ -144,6 +144,12 @@ def get_bottle_plan():
     bottle_list = []
 
     with db.engine.begin() as connection:
+        potions = connection.execute(
+            sqlalchemy.text(
+                """SELECT SUM(change) as total_potions
+                FROM potion_ledger_entry
+                """))
+        total_potions = potions.scalar_one()
         result = connection.execute(
             sqlalchemy.text(
                 """SELECT resource_id, SUM(change) as resource
@@ -189,7 +195,7 @@ def get_bottle_plan():
         to_bottle_list = sorted(to_bottle_list, key=itemgetter(0))
         print(f"Potion quantities: {to_bottle_list}")
 
-        # while total_red_ml >= 100 or total_green_ml >= 100 or total_blue_ml >= 100:
+        amt = 75
         for pot in to_bottle_list:
             potion_type = pot[1]
             print(f"potion type: {potion_type}")
@@ -206,6 +212,13 @@ def get_bottle_plan():
                 
                 make_potions = min(list_of_ml_limiters)
 
+                if make_potions > amt:
+                    make_potions = amt
+
+                if total_potions + make_potions > 300:
+                    break
+                total_potions += make_potions
+
                 bottle_list.append({
                     "potion_type": potion_type,
                     "quantity": make_potions,
@@ -214,6 +227,8 @@ def get_bottle_plan():
                 total_red_ml -= potion_type[0] * make_potions
                 total_green_ml -= potion_type[1] * make_potions
                 total_blue_ml -= potion_type[2] * make_potions
+                if amt >= 35:
+                    amt -= 10
 
     print(f"Bottle List: {bottle_list}")
     return bottle_list
