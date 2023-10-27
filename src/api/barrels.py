@@ -118,7 +118,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             """
         ))
         total_potions = potions.scalar_one()
-        if total_potions >= 250:
+        if total_potions >= 275:
             return []
         result = connection.execute(
             sqlalchemy.text(
