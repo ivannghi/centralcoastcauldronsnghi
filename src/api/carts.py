@@ -61,7 +61,7 @@ def search_orders(
     with db.engine.begin() as conn:
         result = conn.execute(sqlalchemy.text(
             """
-                SELECT cart_items.id, cart_items.quantity, potions.sku, potions.price, carts.name, cart_items.created_at
+                SELECT cart_items.id, cart_items.quantity * potion.price AS line_item_total, potions.sku AS item_sku, carts.name AS customer_name, cart_items.created_at AS timestamp
                 from cart_items
                 INNER JOIN potions ON potion_id = potions.id
                 INNER JOIN carts ON cart_id = carts.id
