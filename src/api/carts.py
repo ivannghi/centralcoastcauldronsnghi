@@ -65,8 +65,25 @@ def search_orders(
                 from cart_items
                 INNER JOIN potions ON potion_id = potions.id
                 INNER JOIN carts ON cart_id = carts.id
-            """
-        ))
+                ORDER BY :sort_col :sort_order
+            """),
+            [{"sort_col": sort_col, "sort_order": sort_order}])
+
+        if customer_name != "":
+            result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        if potion_sku != "":
+            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+
+
+        # result = (
+        # sqlalchemy.select(
+        #     db.movies.c.movie_id,
+        #     db.movies.c.title,
+        #     db.movies.c.year,
+        #     db.movies.c.imdb_rating,
+        #     db.movies.c.imdb_votes,
+        # ).join()
+        # .join())
         
         query = result.all()
         print(query)
@@ -90,8 +107,7 @@ def search_orders(
                 "customer_name": query[m][4],
                 "line_item_total": str(query[m][1]*query[m][3]),
                 "timestamp": output_string,
-            }
-            )
+            })
 
     if n < 5:
         prev = ""
