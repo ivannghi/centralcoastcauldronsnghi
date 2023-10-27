@@ -69,10 +69,10 @@ def search_orders(
             """),
             [{"sort_col": sort_col, "sort_order": sort_order}])
 
-        if customer_name != "":
-            result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        if potion_sku != "":
-            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+        # if customer_name != "":
+        #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        # if potion_sku != "":
+        #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
 
 
         # result = (
