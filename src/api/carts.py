@@ -99,13 +99,13 @@ def search_orders(
 
         results = []
         for m in range(n, n + k):
-            output_string = query[m][5].strftime("%Y-%m-%dT%H:%M:%SZ")
+            output_string = query[m][4].strftime("%Y-%m-%dT%H:%M:%SZ")
             results.append(
                 {
                 "line_item_id": str(query[m][0]),
-                "item_sku": str(query[m][1]) + query[m][2],
-                "customer_name": query[m][4],
-                "line_item_total": str(query[m][1]*query[m][3]),
+                "item_sku": query[m][2],
+                "customer_name": query[m][3],
+                "line_item_total": str(query[m][2]),
                 "timestamp": output_string,
             })
 
