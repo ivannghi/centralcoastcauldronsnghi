@@ -65,7 +65,7 @@ def search_orders(
                 from cart_items
                 INNER JOIN potions ON potion_id = potions.id
                 INNER JOIN carts ON cart_id = carts.id
-                ORDER BY :sort_col :sort_order
+                ORDER BY :sort_col :sort_order;
             """),
             [{"sort_col": sort_col, "sort_order": sort_order}])
 
