@@ -65,14 +65,14 @@ def search_orders(
                 from cart_items
                 INNER JOIN potions ON potion_id = potions.id
                 INNER JOIN carts ON cart_id = carts.id
-                ORDER BY :sort_col :sort_order;
-            """),
-            [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
+            """))
+            # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
+                # ORDER BY :sort_col :sort_order;
 
-        # if customer_name != "":
-        #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        # if potion_sku != "":
-        #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+        if customer_name != "":
+            result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        if potion_sku != "":
+            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
 
 
         # result = (
