@@ -86,9 +86,9 @@ def search_orders(
         # .join())
         
         query = result.all()
-        print(query)
+        # print(query)
         count = len(query)
-        print(count)
+        # print(count)
 
         if count - n > 4:
             k = 5
