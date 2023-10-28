@@ -67,7 +67,7 @@ def search_orders(
                 INNER JOIN carts ON cart_id = carts.id
                 ORDER BY :sort_col :sort_order;
             """),
-            [{"sort_col": sort_col.value, "sort_order": sort_order.value.upper()}])
+            [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
 
         # if customer_name != "":
         #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
