@@ -59,9 +59,9 @@ def search_orders(
         n = int(search_page)
 
     stmt = sqlalchemy.select(db.cart_items.c.id, 
-                             (db.cart_items.c.quantity * db.potions.price).label('line_item_total'),
+                             (db.cart_items.c.quantity * db.potions.c.price).label('line_item_total'),
                              db.potions.c.sku.label('item_sku'),
-                             db.carts.name.label('customer_name'),
+                             db.carts.c.name.label('customer_name'),
                              db.cart_items.c.created_at.label('timestamp')
                              .select_from(db.cart_items)
                              .join(db.potions, db.potions.c.id == db.cart_items.c.potion_id)
