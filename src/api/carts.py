@@ -68,19 +68,19 @@ def search_orders(
                   ).join_from(db.potions, db.potions.c.id == db.cart_items.c.potion_id
                          ).join(db.carts, db.carts.c.id == db.cart_items.c.cart_id)
 
-    if sort_col == search_sort_options.timestamp:
-        order = 'timestamp'
-    elif sort_col == search_sort_options.customer_name:
-        order = 'customer_name'
-    elif sort_col == search_sort_options.item_sku:
-        order = 'item_sku'
-    else:
-        order = 'line_item_total'
+    # if sort_col == search_sort_options.timestamp:
+    #     order = 'timestamp'
+    # elif sort_col == search_sort_options.customer_name:
+    #     order = 'customer_name'
+    # elif sort_col == search_sort_options.item_sku:
+    #     order = 'item_sku'
+    # else:
+    #     order = 'line_item_total'
 
-    if sort_order == search_sort_order.desc:
-        stmt = stmt.order_by(sqlalchemy.desc(order))
-    else:
-        stmt = stmt.order_by(sqlalchemy.asc(order))
+    # if sort_order == search_sort_order.desc:
+    #     stmt = stmt.order_by(sqlalchemy.desc(order))
+    # else:
+    #     stmt = stmt.order_by(sqlalchemy.asc(order))
     
     with db.engine.connect() as conn:
         result = conn.execute(stmt)
@@ -104,17 +104,6 @@ def search_orders(
         #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
         # if potion_sku != "":
         #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
-
-
-        # result = (
-        # sqlalchemy.select(
-        #     db.movies.c.movie_id,
-        #     db.movies.c.title,
-        #     db.movies.c.year,
-        #     db.movies.c.imdb_rating,
-        #     db.movies.c.imdb_votes,
-        # ).join()
-        # .join())
         
         query = result.all()
         # print(query)
