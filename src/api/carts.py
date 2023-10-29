@@ -58,27 +58,37 @@ def search_orders(
     else:
         n = int(search_page)
 
-    with db.engine.begin() as conn:
-        result = conn.execute(sqlalchemy.text(
-            """
-                select
-                cart_items.id,
-                cart_items.quantity * potions.price as line_item_total,
-                potions.sku as item_sku,
-                carts.name as customer_name,
-                cart_items.created_at as timestamp
-                from
-                cart_items
-                inner join potions on cart_items.potion_id = potions.id
-                inner join carts on cart_items.cart_id = carts.id
-            """))
+    stmt = sqlalchemy.select(db.cart_items.c.id, 
+                             (db.cart_items.c.quantity * db.potions.price).label('line_item_total'),
+                             db.potions.c.sku.label('item_sku'),
+                             db.carts.name.label('customer_name'),
+                             db.cart_items.c.created_at.label('timestamp')
+                             .select_from(db.cart_items)
+                             .join(db.potions, db.potions.c.id == db.cart_items.c.potion_id)
+                             .join(db.carts, db.carts.c.id == db.cart_items.c.cart_id))
+
+    with db.engine.connect() as conn:
+        result = conn.execute(stmt)
+        # result = conn.execute(sqlalchemy.text(
+        #     """
+        #         select
+        #         cart_items.id,
+        #         cart_items.quantity * potions.price as line_item_total,
+        #         potions.sku as item_sku,
+        #         carts.name as customer_name,
+        #         cart_items.created_at as timestamp
+        #         from
+        #         cart_items
+        #         inner join potions on cart_items.potion_id = potions.id
+        #         inner join carts on cart_items.cart_id = carts.id
+        #     """))
             # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
                 # ORDER BY :sort_col :sort_order;
 
-        if customer_name != "":
-            result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        if potion_sku != "":
-            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+        # if customer_name != "":
+        #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        # if potion_sku != "":
+        #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
 
 
         # result = (
