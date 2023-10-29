@@ -63,9 +63,9 @@ def search_orders(
                              db.potions.c.sku.label('item_sku'),
                              db.carts.c.name.label('customer_name'),
                              db.cart_items.c.created_at.label('timestamp')
-                             .select_from(db.cart_items)
-                             .join(db.potions, db.potions.c.id == db.cart_items.c.potion_id)
-                             .join(db.carts, db.carts.c.id == db.cart_items.c.cart_id))
+                             ).select_from(db.cart_items
+                                           ).join(db.potions, db.potions.c.id == db.cart_items.c.potion_id
+                                                  ).join(db.carts, db.carts.c.id == db.cart_items.c.cart_id)
 
     with db.engine.connect() as conn:
         result = conn.execute(stmt)
