@@ -58,15 +58,30 @@ def search_orders(
     else:
         n = int(search_page)
 
-    stmt = sqlalchemy.select(db.cart_items.c.id, 
-                             (db.cart_items.c.quantity * db.potions.c.price).label('line_item_total'),
-                             db.potions.c.sku.label('item_sku'),
-                             db.carts.c.name.label('customer_name'),
-                             db.cart_items.c.created_at.label('timestamp')
-                             ).select_from(db.cart_items
-                                           ).join(db.potions, db.potions.c.id == db.cart_items.c.potion_id
-                                                  ).join(db.carts, db.carts.c.id == db.cart_items.c.cart_id)
+    stmt = sqlalchemy.select(
+        db.cart_items.c.id, 
+        (db.cart_items.c.quantity * db.potions.c.price).label('line_item_total'),
+        db.potions.c.sku.label('item_sku'),
+        db.carts.c.name.label('customer_name'),
+        db.cart_items.c.created_at.label('timestamp')
+    ).select_from(db.cart_items
+                  ).join_from(db.potions, db.potions.c.id == db.cart_items.c.potion_id
+                         ).join(db.carts, db.carts.c.id == db.cart_items.c.cart_id)
 
+    if sort_col == search_sort_options.timestamp:
+        order = 'timestamp'
+    elif sort_col == search_sort_options.customer_name:
+        order = 'customer_name'
+    elif sort_col == search_sort_options.item_sku:
+        order = 'item_sku'
+    else:
+        order = 'line_item_total'
+
+    if sort_order == search_sort_order.desc:
+        stmt = stmt.order_by(sqlalchemy.desc(order))
+    else:
+        stmt = stmt.order_by(sqlalchemy.asc(order))
+    
     with db.engine.connect() as conn:
         result = conn.execute(stmt)
         # result = conn.execute(sqlalchemy.text(
@@ -85,10 +100,10 @@ def search_orders(
             # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
                 # ORDER BY :sort_col :sort_order;
 
-        # if customer_name != "":
-        #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        # if potion_sku != "":
-        #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+        if customer_name != "":
+            result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        if potion_sku != "":
+            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
 
 
         # result = (
