@@ -84,9 +84,9 @@ def search_orders(
         #     stmt = stmt.order_by(sqlalchemy.asc(order))
         
         if customer_name != "":
-            stmt = stmt.where(carts.c.name.ilike(f"%{customer_name}%"))
+            stmt = stmt.where(db.carts.c.name.ilike(f"%{customer_name}%"))
         if potion_sku != "":
-            stmt = stmt.where(carts.c.item_sku.ilike(f"%{potion_sku}%"))
+            stmt = stmt.where(db.carts.c.item_sku.ilike(f"%{potion_sku}%"))
         
         result = conn.execute(stmt)
         
