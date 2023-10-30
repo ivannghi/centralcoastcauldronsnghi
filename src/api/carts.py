@@ -89,28 +89,9 @@ def search_orders(
             stmt = stmt.where(db.potions.c.sku.ilike(f"%{potion_sku}%"))
         
         result = conn.execute(stmt)
-        
-        # result = conn.execute(sqlalchemy.text(
-        #     """
-        #         select
-        #         cart_items.id,
-        #         cart_items.quantity * potions.price as line_item_total,
-        #         potions.sku as item_sku,
-        #         carts.name as customer_name,
-        #         cart_items.created_at as timestamp
-        #         from
-        #         cart_items
-        #         inner join potions on cart_items.potion_id = potions.id
-        #         inner join carts on cart_items.cart_id = carts.id
-        #     """))
-            # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
-                # ORDER BY :sort_col :sort_order;
 
-        
         query = result.all()
-        # print(query)
         count = len(query)
-        # print(count)
 
         if count - n > 4:
             k = 5
