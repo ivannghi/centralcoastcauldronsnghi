@@ -82,6 +82,11 @@ def search_orders(
     # else:
     #     stmt = stmt.order_by(sqlalchemy.asc(order))
     
+    if customer_name != "":
+        stmt = stmt.where(carts.c.name.ilike(f"%{customer_name}%"))
+    if potion_sku != "":
+        stmt = stmt.where(carts.c.item_sku.ilike(f"%{potion_sku}%"))
+    
     with db.engine.connect() as conn:
         result = conn.execute(stmt)
         # result = conn.execute(sqlalchemy.text(
@@ -100,10 +105,6 @@ def search_orders(
             # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
                 # ORDER BY :sort_col :sort_order;
 
-        if customer_name != "":
-            result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        if potion_sku != "":
-            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
         
         query = result.all()
         # print(query)
@@ -125,7 +126,7 @@ def search_orders(
                 "line_item_id": str(query[m][0]),
                 "item_sku": query[m][2],
                 "customer_name": query[m][3],
-                "line_item_total": str(query[m][2]),
+                "line_item_total": str(query[m][1]),
                 "timestamp": output_string,
             })
 
