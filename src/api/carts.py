@@ -100,10 +100,10 @@ def search_orders(
             # [{"sort_col": str(sort_col.value), "sort_order": str(sort_order.value.upper())}])
                 # ORDER BY :sort_col :sort_order;
 
-        # if customer_name != "":
-        #     result = result.where(carts.name.ilike(f"%{customer_name}%"))
-        # if potion_sku != "":
-        #     result = result.where(carts.name.ilike(f"%{potion_sku}%"))
+        if customer_name != "":
+            result = result.where(carts.name.ilike(f"%{customer_name}%"))
+        if potion_sku != "":
+            result = result.where(carts.name.ilike(f"%{potion_sku}%"))
         
         query = result.all()
         # print(query)
