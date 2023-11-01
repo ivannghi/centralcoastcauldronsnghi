@@ -149,7 +149,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         ml_list = sorted(ml_list, key=itemgetter(0))
         print(ml_list)
 
-        if total_gold <= 120:
+        if total_gold <= 180:
             if total_gold >= 60:
                 barrels_list.append({
                     "sku": "MINI_RED_BARREL",
